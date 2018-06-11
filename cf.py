@@ -31,7 +31,7 @@ if __name__ == '__main__':
     
     u_id = {}
     o_id = {}
-    pdb.set_trace()    
+    # pdb.set_trace()    
     for line in df.itertuples(): # line[0] is index
         u_id[line[1]] = 0
         o_id[line[2]] = 0
@@ -51,6 +51,9 @@ if __name__ == '__main__':
     df = df.join(pd.DataFrame({'u_id' : u_id_list, 'o_id' : o_id_list}))
     
     train_data, test_data = cv.train_test_split(df, test_size=TEST_SIZE_PERCENTAGE)
+    train_data.to_csv('train_data.csv')    # save train_data for further analysis    
+    test_data.to_csv('test_data.csv')    # save test_data for further analysis
+
     #Create two user-item matrices, one for training and another for testing
     train_data_matrix = np.zeros((n_users, n_organizations))
     for line in train_data.itertuples(): # row: user; column: organization
@@ -61,6 +64,7 @@ if __name__ == '__main__':
         test_data_matrix[line.u_id, line.o_id] = line.joint_times
     user_similarity = cosine_similarity(train_data_matrix) # possibly produces nan value
     item_similarity = cosine_similarity(train_data_matrix.T)
+    item_similarity.dump('item_similarity_partial.npx') # save similarity for further analysis
     user_prediction = predict(train_data_matrix, user_similarity, type='user')   
     item_prediction = predict(train_data_matrix, item_similarity, type='item')
     print('User-based CF RMSE: ' + str(rmse(user_prediction, test_data_matrix)))
